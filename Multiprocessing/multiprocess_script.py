@@ -43,12 +43,12 @@ def load_img(img_fp):
     img_fn = tf.strings.split(img_fp, '\\')[-1]
     return img, img_fn
 
-def load_mnist():
+def load_mnist(batch_size=1):
     extract_mnist()
     train_dir = os.path.join(upDir(os.getcwd()), 'sharedfiles','mnist_tiny','training', '*.png')
     imgs = tf.data.Dataset.list_files(train_dir)
     imgs = imgs.map(load_img)
-    imgs = imgs.batch(1)
+    imgs = imgs.batch(batch_size)
     return imgs
 #%%
 
