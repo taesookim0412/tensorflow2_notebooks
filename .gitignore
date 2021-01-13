@@ -1,0 +1,5 @@
+**/mask_rcnn_inception_resnet_v2_1024x1024_coco17_gpu-8
+**/mnist_png
+**/mnist_tiny
+/sharedmodels/mask_rcnn_inception_resnet_v2_1024x1024_coco17_gpu-8/
+.idea
