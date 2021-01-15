@@ -43,14 +43,33 @@ def load_img(img_fp):
     img_fn = tf.strings.split(img_fp, '\\')[-1]
     return img, img_fn
 
-def load_mnist(batch_size=1):
-    extract_mnist()
+#pushed to modules/tf/load_img .. remove
+def load_mnist(batch_size=1, tiny=True, filterFns=False):
+    mnist_subdir = 'mnist_png'
+    if tiny:
+        mnist_subdir = 'mnist_tiny'
+    extract_mnist(mnist_subdir)
     train_dir = os.path.join(upDir(os.getcwd()), 'sharedfiles','mnist_tiny','training', '*.png')
     imgs = tf.data.Dataset.list_files(train_dir)
+    if filterFns:
+        pass
+        #filter half
+        # skips = set([f"{str(s*2)}.png" for s in range(len(imgs)//2)])
+        # imgs = imgs.filter(lambda img_fp: filter_mnist(img_fp, skips))
     imgs = imgs.map(load_img)
     imgs = imgs.batch(batch_size)
     return imgs
 #%%
+
+
+def extract_mnist(mnist_subdir):
+    mnist_path = os.path.join(upDir(os.getcwd()), 'sharedfiles', mnist_subdir)
+    if not os.path.isdir(mnist_path):
+        mnist_path = os.path.join(upDir(os.getcwd()), 'sharedfiles', f"{mnist_subdir}.zip")
+        mnist_extract_path = os.path.dirname(mnist_path)
+        with ZipFile(mnist_path, 'r') as f:
+            f.extractall(mnist_extract_path)
+        f.close()
 
 def setGrowth():
     gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -59,8 +78,6 @@ def setGrowth():
             tf.config.experimental.set_memory_growth(gpu, True)
     except Exception as e:
         print(e)
-setGrowth()
-
 #%%
 
 def upDir(dir):
@@ -68,14 +85,7 @@ def upDir(dir):
 
 #%%
 
-def extract_mnist():
-    mnist_path = os.path.join(upDir(os.getcwd()), 'sharedfiles', 'mnist_tiny')
-    if not os.path.isdir(mnist_path):
-        mnist_path = os.path.join(upDir(os.getcwd()), 'sharedfiles', 'mnist_tiny.zip')
-        mnist_extract_path = os.path.join(os.path.dirname(mnist_path))
-        with ZipFile(mnist_path, 'r') as f:
-            f.extractall(mnist_extract_path)
-        f.close()
+
 
 
 
