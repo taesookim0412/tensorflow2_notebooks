@@ -3,12 +3,20 @@ import os
 from zipfile import ZipFile
 import glob
 
+@tf.function
 def load_img(img_fp):
     img = tf.io.read_file(img_fp)
-    img = tf.image.decode_image(img, dtype=tf.uint8)
-    img = tf.image.grayscale_to_rgb(img)
+    img = tf.image.decode_image(img, dtype=tf.float32)
+    img = tf.image.resize_with_crop_or_pad(img, 16, 16)
+    #img = tf.image.grayscale_to_rgb(img)
     img_fn = tf.strings.split(img_fp, '\\')[-1]
     return img, img_fn
+
+@tf.function
+def map_imgs(img_fp, dtype):
+    '''subdir_idx: len(split(traindir))'''
+    return load_img(img_fp)
+
 
 def load_mnist(batch_size=1, tiny=True, filterFns=False):
     mnist_subdir = 'mnist_png'
@@ -23,7 +31,8 @@ def load_mnist(batch_size=1, tiny=True, filterFns=False):
     else:
         globbedFiles = glob.glob(train_dir)
     imgs = tf.data.Dataset.from_tensor_slices(globbedFiles)
-    imgs = imgs.map(load_img)
+    imgs = imgs.shuffle(len(imgs), reshuffle_each_iteration=False)
+    imgs = imgs.map(lambda fp: map_imgs(fp, tf.float32))
     imgs = imgs.batch(batch_size)
     return imgs
 
